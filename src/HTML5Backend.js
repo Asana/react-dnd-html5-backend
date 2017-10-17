@@ -32,6 +32,7 @@ export default class HTML5Backend {
     this.handleSelectStart = this.handleSelectStart.bind(this);
     this.endDragIfSourceWasRemovedFromDOM = this.endDragIfSourceWasRemovedFromDOM.bind(this);
     this.endDragNativeItem = this.endDragNativeItem.bind(this);
+    this.asyncEndDragNativeItem = this.asyncEndDragNativeItem.bind(this);
   }
 
   setup() {
@@ -57,6 +58,9 @@ export default class HTML5Backend {
     this.constructor.isSetUp = false;
     this.removeEventListeners(this.windowService);
     this.clearCurrentDragSourceNode();
+    if (this.asyncEndDragFrameId) {
+      this.windowService.cancelAnimationFrame(this.asyncEndDragFrameId);
+    }
   }
 
   addEventListeners(target) {
@@ -179,6 +183,21 @@ export default class HTML5Backend {
     this.currentNativeSource = new SourceType();
     this.currentNativeHandle = this.registry.addSource(type, this.currentNativeSource);
     this.actions.beginDrag([this.currentNativeHandle]);
+
+    // On Firefox, if mouseover fires, the drag is over but browser failed to tell us.
+    // See https://bugzilla.mozilla.org/show_bug.cgi?id=656164
+    // This is not true for other browsers.
+    if (isFirefox()) {
+      this.windowService.addEventListener('mouseover', this.asyncEndDragNativeItem, true);
+    }
+  }
+
+  asyncEndDragNativeItem() {
+    this.asyncEndDragFrameId = this.windowService.requestAnimationFrame(this.endDragNativeItem);
+    if (isFirefox()) {
+      this.windowService.removeEventListener('mouseover', this.asyncEndDragNativeItem, true);
+      this.enterLeaveCounter.reset();
+    }
   }
 
   endDragNativeItem() {
