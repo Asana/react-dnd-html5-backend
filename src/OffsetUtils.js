@@ -26,10 +26,12 @@ export function getEventClientOffset(e) {
 export function getDragPreviewOffset(sourceNode, dragPreview, clientOffset, anchorPoint) {
   // The browsers will use the image intrinsic size under different conditions.
   // Firefox only cares if it's an image, but WebKit also wants it to be detached.
-  const isImage = dragPreview.nodeName === 'IMG' && (
-    isFirefox() ||
-    !document.documentElement.contains(dragPreview)
-  );
+  const isImage = dragPreview 
+    && (dragPreview.nodeName === 'IMG') 
+    && (
+      isFirefox() ||
+      !document.documentElement.contains(dragPreview)
+    );
   const dragPreviewNode = isImage ? sourceNode : dragPreview;
 
   const dragPreviewNodeOffsetFromClient = getNodeClientOffset(dragPreviewNode);
