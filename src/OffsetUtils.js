@@ -24,13 +24,6 @@ export function getEventClientOffset(e) {
 }
 
 export function getDragPreviewOffset(sourceNode, dragPreview, clientOffset, anchorPoint) {
-  // https://app.asana.com/0/1149204378422/1119566821863177
-  // Return early with no offset if dragPreview is undefined
-  // This occurs rarely and is a known issue: https://github.com/react-dnd/react-dnd/issues/971
-  if (!dragPreview) {
-    return { x: 0, y: 0 };
-  }
-
   // The browsers will use the image intrinsic size under different conditions.
   // Firefox only cares if it's an image, but WebKit also wants it to be detached.
   const isImage = dragPreview.nodeName === 'IMG' && (
