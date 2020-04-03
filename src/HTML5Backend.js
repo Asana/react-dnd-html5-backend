@@ -310,15 +310,23 @@ export default class HTML5Backend {
         const sourceId = this.monitor.getSourceId();
         const sourceNode = this.sourceNodes[sourceId];
         const dragPreview = this.sourcePreviewNodes[sourceId] || sourceNode;
-        const { anchorX, anchorY } = this.getCurrentSourcePreviewNodeOptions();
-        const anchorPoint = { anchorX, anchorY };
-        const dragPreviewOffset = getDragPreviewOffset(
-          sourceNode,
-          dragPreview,
-          clientOffset,
-          anchorPoint
-        );
-        dataTransfer.setDragImage(dragPreview, dragPreviewOffset.x, dragPreviewOffset.y);
+
+        // ##NoDragPreview
+        // https://app.asana.com/0/750765658990785/1169293839100683
+        // https://app.asana.com/0/1149204378422/1119566821863177
+        // Don't do anything if dragPreview is undefined, otherwise the application will crash.
+        // This occurs rarely and is a known issue: https://github.com/react-dnd/react-dnd/issues/971
+        if (dragPreview) {
+          const { anchorX, anchorY } = this.getCurrentSourcePreviewNodeOptions();
+          const anchorPoint = { anchorX, anchorY };
+          const dragPreviewOffset = getDragPreviewOffset(
+            sourceNode,
+            dragPreview,
+            clientOffset,
+            anchorPoint
+          );
+          dataTransfer.setDragImage(dragPreview, dragPreviewOffset.x, dragPreviewOffset.y);
+        }
       }
 
       try {
